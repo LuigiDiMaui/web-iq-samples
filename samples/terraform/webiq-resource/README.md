@@ -22,7 +22,6 @@ doesn't create the Web IQ AppID or API keys, and it never reads or outputs keys.
 - Web IQ enabled for the subscription. If it isn't, see [Troubleshooting](#web-iq-is-not-enabled-for-your-subscription).
 - The `Microsoft.WebIQ` resource provider registered in the subscription; see [Register the resource provider](#register-the-resource-provider)
 
-<!-- TODO(PM): The Learn deployment guides only say "a subscription where you can create resources". Confirm the minimum Azure role needed to create a Microsoft.WebIQ/accounts resource (and a resource group, when create_resource_group is true) before adding it here. -->
 
 ## Get started
 
@@ -153,7 +152,6 @@ you set `create_resource_group = true`, it also deletes the resource group and
 **all its resources**; don't use that setting with an existing or shared
 resource group.
 
-<!-- TODO(PM): The Learn docs don't say what happens to the Web IQ AppID and API keys when the Web IQ resource is deleted, or whether billing stops right away. Confirm before stating it here. -->
 
 ## Further guidance
 
