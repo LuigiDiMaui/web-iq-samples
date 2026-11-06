@@ -9,7 +9,6 @@ from webiq_vendor_questionnaire.client import Page, PageProblem
 from webiq_vendor_questionnaire.config import Vendor, VendorPage
 from webiq_vendor_questionnaire.display import (
     DISPLAY_CHARACTER_LIMIT,
-    excerpt,
     render,
     terminal_text,
     timestamp_label,
@@ -35,7 +34,7 @@ def run(questions, rows):
 
 
 def quotes(text):
-    return re.findall(r'^    "(.*?)(?:\.\.\.)?"$', text, flags=re.MULTILINE)
+    return re.findall(r'^    "(?:\.\.\.)?(.*?)(?:\.\.\.)?"$', text, flags=re.MULTILINE)
 
 
 def test_quote_is_at_most_200_characters_and_passages_are_not_printed():
@@ -48,7 +47,7 @@ def test_quote_is_at_most_200_characters_and_passages_are_not_printed():
 
 
 def test_a_source_shares_200_characters_across_the_run():
-    questions = tuple(f"Where is customer data stored, case {i}?" for i in range(3))
+    questions = tuple(f"Where is customer data stored by region, case {i}?" for i in range(3))
     text, shown = run(questions, [[PAGE]] * 3)
     assert len(quotes(text)) == 3
     assert shown <= DISPLAY_CHARACTER_LIMIT
@@ -56,7 +55,7 @@ def test_a_source_shares_200_characters_across_the_run():
 
 
 def test_a_source_used_too_often_gets_no_more_quotes():
-    questions = tuple(f"Where is customer data stored, case {i}?" for i in range(8))
+    questions = tuple(f"Where is customer data stored by region, case {i}?" for i in range(8))
     text, shown = run(questions, [[PAGE]] * 8)
     assert shown <= DISPLAY_CHARACTER_LIMIT
     assert "No quote: this run already showed the most text allowed" in text
@@ -78,13 +77,6 @@ def test_summary_line_reports_returned_and_shown_characters():
         f"ready as model input in this run; {shown:,} characters are shown here."
     ) in text
     assert "Nothing was saved." in text
-
-
-def test_excerpt_cuts_at_a_word_boundary():
-    assert excerpt("one two three four five six seven eight nine ten eleven twelve", 50) == (
-        "one two three four five six seven eight nine ten"
-    )
-    assert excerpt("short text", 39) == ""
 
 
 def test_terminal_text_removes_control_characters():

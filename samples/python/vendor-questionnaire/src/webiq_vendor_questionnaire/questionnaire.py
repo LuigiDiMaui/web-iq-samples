@@ -12,6 +12,8 @@ from .client import BrowseClient, Page, PageProblem
 from .config import Vendor
 
 MAX_SOURCES_PER_ANSWER = 2
+MIN_MATCHED_WORDS = 2
+SECOND_SOURCE_RATIO = 0.75
 WORKERS = 4
 
 STOPWORDS = {
@@ -118,37 +120,72 @@ def rank_sources(question: str, pages: tuple[Page, ...]) -> tuple[Source, ...]:
     """Rank pages by the question's distinctive words found in their passages.
 
     A simple keyword match, so the sample runs without a model. Words found on every
-    page count less. A page needs at least one word that isn't on every page.
+    page count less. A page needs at least two of the question's words (one if the
+    question has only one), including one that isn't on every page. A second source is
+    kept only when it scores close to the first.
     """
     terms = keywords(question)
     if not terms or not pages:
         return ()
+    needed = min(MIN_MATCHED_WORDS, len(terms))
     page_terms = [keywords(page.content) for page in pages]
     document_frequency = {term: sum(term in found for found in page_terms) for term in terms}
     scored: list[Source] = []
     for page, found in zip(pages, page_terms):
         matched = terms & found
+        if len(matched) < needed:
+            continue
         if len(pages) > 1 and all(document_frequency[t] == len(pages) for t in matched):
             continue
-        score = sum(1 / document_frequency[term] for term in matched)
-        if score > 0:
-            scored.append(Source(page, score))
+        scored.append(Source(page, sum(1 / document_frequency[term] for term in matched)))
     scored.sort(key=lambda source: source.score, reverse=True)
-    return tuple(scored[:MAX_SOURCES_PER_ANSWER])
+    if not scored:
+        return ()
+    top = scored[0].score
+    return tuple(
+        source
+        for index, source in enumerate(scored[:MAX_SOURCES_PER_ANSWER])
+        if index == 0 or source.score >= SECOND_SOURCE_RATIO * top
+    )
 
 
-def best_segment(question: str, content: str) -> str:
-    """Return the passage segment or sentence that contains the most question words."""
+def best_quote(question: str, page: Page, limit: int) -> tuple[str, bool, bool]:
+    """Return the window of at most `limit` characters with the most question words.
+
+    Returns the quote and whether text was cut before and after it. The window stays
+    inside one passage segment, starts and ends on whole words, and skips the page title
+    when the passage starts with it.
+    """
+    if limit <= 0:
+        return "", False, False
     terms = keywords(question)
-    segments = [
-        segment.strip()
-        for part in re.split(r"\s\.\.\.\s", content)
-        for segment in re.split(r"(?<=[.!?])\s+", part)
-        if segment.strip()
-    ]
-    if not segments:
-        return ""
-    return max(segments, key=lambda segment: len(terms & keywords(segment)))
+    content = page.content
+    skip = len(page.title) if page.title and content.startswith(page.title) else 0
+    best: tuple[int, int, int] | None = None
+    for segment in re.finditer(r"(?:(?!\s\.\.\.\s).)+", content, flags=re.DOTALL):
+        words = [
+            (match.start(), match.end(), stem(match.group().lower()))
+            for match in re.finditer(r"[A-Za-z0-9][A-Za-z0-9'-]*", segment.group())
+        ]
+        words = [(segment.start() + s, segment.start() + e, w) for s, e, w in words]
+        words = [word for word in words if word[0] >= skip]
+        end_index = 0
+        for start_index, (start, _, _) in enumerate(words):
+            end_index = max(end_index, start_index)
+            while end_index + 1 < len(words) and words[end_index + 1][1] - start <= limit:
+                end_index += 1
+            if words[end_index][1] - start > limit:
+                continue
+            hits = len(terms & {word[2] for word in words[start_index : end_index + 1]})
+            if best is None or hits > best[0]:
+                best = (hits, start, words[end_index][1])
+    if best is None:
+        return "", False, False
+    _, start, end = best
+    # Keep closing punctuation right after the last word when it fits.
+    while end < len(content) and content[end] in ".!?;:,)" and end + 1 - start <= limit:
+        end += 1
+    return content[start:end], start > 0, end < len(content.rstrip())
 
 
 def keywords(text: str) -> set[str]:

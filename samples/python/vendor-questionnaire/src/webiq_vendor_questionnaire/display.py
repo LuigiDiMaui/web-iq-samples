@@ -8,13 +8,13 @@ from datetime import datetime, timezone
 from typing import TextIO
 
 from .config import Vendor
-from .questionnaire import Results, best_segment
+from .questionnaire import Results, best_quote
 
 # The Web IQ Terms of Use limit displayed content to 200 characters per source, or less if
 # the website owner sets a lower maximum (which this sample can't detect). The sample applies
 # the limit to the whole run: a page cited in several answers shares its 200 characters.
 DISPLAY_CHARACTER_LIMIT = 200
-MIN_EXCERPT_CHARACTERS = 40
+MIN_QUOTE_CHARACTERS = 60
 ELLIPSIS = "..."
 
 
@@ -48,18 +48,23 @@ def render(
             continue
         for number, source in enumerate(answer.sources, start=1):
             page = source.page
-            share = max(MIN_EXCERPT_CHARACTERS, DISPLAY_CHARACTER_LIMIT // uses[page.url])
+            share = max(MIN_QUOTE_CHARACTERS, DISPLAY_CHARACTER_LIMIT // uses[page.url])
             available = min(share, remaining[page.url])
-            segment = terminal_text(best_segment(answer.question, page.content))
-            quote = excerpt(segment, available)
+            quote, cut_before, cut_after = (
+                best_quote(answer.question, page, available)
+                if available >= MIN_QUOTE_CHARACTERS
+                else ("", False, False)
+            )
+            quote = terminal_text(quote)
             remaining[page.url] -= len(quote)
             shown_total += len(quote)
 
             title = terminal_text(page.title) or terminal_text(labels.get(page.url, ""))
             print(f"  Source {number}: {title or '(title not provided)'}", file=output)
             if quote:
-                suffix = ELLIPSIS if len(quote) < len(segment) else ""
-                print(f'    "{quote}{suffix}"', file=output)
+                prefix = ELLIPSIS if cut_before else ""
+                suffix = ELLIPSIS if cut_after else ""
+                print(f'    "{prefix}{quote}{suffix}"', file=output)
             else:
                 print(
                     "    [No quote: this run already showed the most text allowed from this "
@@ -130,16 +135,3 @@ def terminal_text(value: str) -> str:
         if not unicodedata.category(character).startswith("C") or character in "\n\t"
     )
     return " ".join(text.split())
-
-
-def excerpt(text: str, limit: int) -> str:
-    """Return at most `limit` characters of text, cut at a word boundary when possible."""
-    if limit < MIN_EXCERPT_CHARACTERS:
-        return ""
-    if len(text) <= limit:
-        return text
-    cut = text[:limit]
-    boundary = cut.rfind(" ")
-    if boundary >= limit * 0.6:
-        cut = cut[:boundary]
-    return cut.rstrip()

@@ -77,14 +77,14 @@ With `--live-crawl`, pages that return HTTP 404 (not in the index) are sent agai
 
 **What Browse returns**: up to 3,000 characters of passages for each question and page. They're kept in memory as the input for your model (see [Add your own model](#add-your-own-model)) and never printed.
 
-**What the terminal shows**: for each question, the best one or two sources, each with a quote cut in code from the passage segment that best matches the question, the page title, the link, and the crawl date. Each page can be quoted for at most 200 characters in the whole run. A page cited in several answers shares those 200 characters, and once they're used, later answers link to the page without a quote. Each source line shows how many characters Browse returned and how many are shown, and the run ends with the totals, for example:
+**What the terminal shows**: for each question, the best one or two sources, each with a quote cut in code from the part of the passage that contains the most question words (skipping the page title), the page title, the link, and the crawl date. Each page can be quoted for at most 200 characters in the whole run. A page cited in several answers shares those 200 characters, and once they're used, later answers link to the page without a quote. Each source line shows how many characters Browse returned and how many are shown, and the run ends with the totals, for example:
 
 ```text
 [1] Where is customer data stored, and can the customer choose the region?
   Source 1: Example data location page
-    "Synthetic text: customer data is stored in the region the customer chooses."
+    "...Synthetic text: customer data is stored in the region the customer chooses when the account is created..."
     https://example.com/trust/data-location
-    2,840 characters returned, ready for your model; 76 shown
+    2,840 characters returned, ready for your model; 103 shown
     Crawled: 2026-11-04T08:00:00Z (2 days ago); last updated: not provided
 
 [2] How long is customer data kept after the contract ends?
@@ -99,7 +99,7 @@ The 200-character limit follows the Use and Display Requirements in the [Web IQ 
 
 ### How sources are picked
 
-The sample ranks pages by how many of the question's distinctive words their passages contain, so it runs without a model. Words that appear on every page, and words common to all questionnaire questions such as "customer" and "data", count less or not at all. "Not found on these pages" means no page matched; it isn't a statement about the vendor. Your model, or a person, does the real reading.
+The sample ranks pages by how many of the question's distinctive words their passages contain, so it runs without a model. Words that appear on every page, and words common to all questionnaire questions such as "customer" and "data", count less or not at all. A page needs at least two of the question's words (one if the question has only one), and a second source is shown only when it scores close to the first. "Not found on these pages" means no page matched well enough; it isn't a statement about the vendor. Your model, or a person, does the real reading.
 
 ## Live crawl
 

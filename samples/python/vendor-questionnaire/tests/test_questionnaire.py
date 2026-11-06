@@ -9,7 +9,7 @@ import pytest
 from webiq_vendor_questionnaire.client import BrowseClient, BrowseError, Page, PageProblem
 from webiq_vendor_questionnaire.config import Vendor, VendorPage
 from webiq_vendor_questionnaire.questionnaire import (
-    best_segment,
+    best_quote,
     build_results,
     collect,
     keywords,
@@ -93,10 +93,29 @@ def test_rank_sources_keeps_at_most_two():
     assert len(rank_sources("Can the customer choose the storage region?", pages)) == 2
 
 
-def test_best_segment_picks_the_matching_part():
-    assert best_segment("Where are backups kept?", RESIDENCY.content) == (
-        "Backups stay in the same geography."
+def test_best_quote_finds_the_matching_part_within_the_limit():
+    page = Page("https://a.example", "", "Unrelated opening text here. ... Backups stay in the same geography as the primary copy.", None, None)
+    quote, before, after = best_quote("Where are backups kept in the same geography?", page, 60)
+    assert quote.startswith("Backups stay in the same geography")
+    assert len(quote) <= 60
+    assert before
+
+
+def test_best_quote_skips_the_page_title_and_stays_in_one_segment():
+    page = Page(
+        "https://a.example",
+        "Data deletion overview",
+        "Data deletion overview Some navigation. ... To request deletion, open a support request.",
+        None,
+        None,
     )
+    quote, _, after = best_quote("How can a customer request deletion?", page, 200)
+    assert quote == "To request deletion, open a support request."
+    assert not after
+
+
+def test_best_quote_with_no_room_returns_nothing():
+    assert best_quote("q", RESIDENCY, 0) == ("", False, False)
 
 
 def test_collect_retries_unindexed_pages_with_live_crawl():
