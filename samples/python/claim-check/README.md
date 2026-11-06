@@ -98,7 +98,7 @@ The sample sends this request to `https://api.microsoft.ai/v3/auto` with the `x-
     Last updated: 2026-11-05T12:00:00Z (1 day ago)
     Crawled: 2026-11-06T06:00:00Z (6 hours ago)
 
-1,719 characters of evidence from 1 source(s) are ready for a model in this run; 194 are shown here.
+Auto returned 1,719 characters of evidence from 1 source(s). This sample keeps 1,719 for a model in this run (up to 3,000 per source) and shows 194.
 ```
 
 This example uses synthetic text and a reserved example domain, not saved API output. Ages assume a run at `2026-11-06T12:00:00Z`.

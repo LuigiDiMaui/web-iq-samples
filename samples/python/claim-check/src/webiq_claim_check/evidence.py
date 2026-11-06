@@ -25,6 +25,8 @@ class EvidenceItem:
     content: str
     citations: tuple[Citation, ...]
     shortened: bool
+    returned_length: int = 0
+    """Characters Auto returned for this item, before this sample's per-source budget."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -74,11 +76,12 @@ def select_evidence(response: dict[str, object]) -> EvidenceSelection:
                 f"Result {index} skipped: a cited source's character budget is exhausted."
             )
             continue
-        shortened = len(content) > available
+        returned_length = len(content)
+        shortened = returned_length > available
         content = content[:available]
         for url in urls:
             used_characters[url] = used_characters.get(url, 0) + len(content)
-        items.append(EvidenceItem(content, citations, shortened))
+        items.append(EvidenceItem(content, citations, shortened, returned_length))
     return EvidenceSelection(tuple(items), tuple(warnings))
 
 

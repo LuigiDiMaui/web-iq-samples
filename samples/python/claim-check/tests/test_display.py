@@ -66,8 +66,16 @@ def test_totals_and_freshness_are_shown():
     text = render(EvidenceItem("Short synthetic evidence.", (source("https://a.example"),), False))
     assert "(1 day ago)" in text
     assert "(6 hours ago)" in text
-    assert "25 characters of evidence from 1 source(s)" in text
+    assert "Auto returned 25 characters of evidence from 1 source(s)" in text
     assert "not an automated verdict" in text
+
+
+def test_returned_length_is_reported_before_the_sample_budget():
+    text = render(
+        EvidenceItem("word " * 600, (source("https://a.example"),), True, returned_length=5154)
+    )
+    assert "5,154 characters returned" in text
+    assert "keeps 3,000 for a model" in text
 
 
 def test_control_characters_are_removed():

@@ -78,6 +78,14 @@ def test_missing_results_is_empty():
     assert select_evidence({}).items == ()
 
 
+def test_long_passage_keeps_its_returned_length():
+    selection = select_evidence({"results": [result("x" * 5154, "https://a.example")]})
+    item = selection.items[0]
+    assert len(item.content) == 3000
+    assert item.returned_length == 5154
+    assert item.shortened
+
+
 def test_invalid_results_type_raises():
     with pytest.raises(ValueError):
         select_evidence({"results": {}})

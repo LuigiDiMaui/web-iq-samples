@@ -91,6 +91,7 @@ def render_evidence(
 
     shown_per_source: dict[str, int] = {}
     returned_total = 0
+    kept_total = 0
     shown_total = 0
     for index, item in enumerate(selection.items, start=1):
         text = terminal_text(item.content)
@@ -102,11 +103,13 @@ def render_evidence(
         shown = excerpt(text, available)
         for url in urls:
             shown_per_source[url] = shown_per_source.get(url, 0) + len(shown)
-        returned_total += len(item.content)
+        returned = item.returned_length or len(item.content)
+        kept_total += len(item.content)
+        returned_total += returned
         shown_total += len(shown)
 
         print(
-            f"\n[{index}] Evidence ({len(item.content):,} characters returned, "
+            f"\n[{index}] Evidence ({returned:,} characters returned, "
             f"{len(shown):,} shown)",
             file=output,
         )
@@ -136,8 +139,9 @@ def render_evidence(
             )
             print(f"    Crawled: {timestamp_label(source.crawled_at, now)}", file=output)
     print(
-        f"\n{returned_total:,} characters of evidence from {selection.source_count} "
-        f"source(s) are ready for a model in this run; {shown_total:,} are shown here.",
+        f"\nAuto returned {returned_total:,} characters of evidence from "
+        f"{selection.source_count} source(s). This sample keeps {kept_total:,} for a model "
+        f"in this run (up to 3,000 per source) and shows {shown_total:,}.",
         file=output,
     )
     print(
