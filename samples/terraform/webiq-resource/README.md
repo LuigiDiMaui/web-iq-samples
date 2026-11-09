@@ -149,7 +149,7 @@ don't prove that the deployment succeeds in your subscription.
 
 Run `terraform destroy` in either shell. This deletes the Web IQ resource. If
 you set `create_resource_group = true`, it also deletes the resource group and
-**all its resources**; don't use that setting with an existing or shared
+**all its resources**; do not use that setting with an existing or shared
 resource group.
 
 
