@@ -44,6 +44,7 @@ def load_vendor(path: Path) -> Vendor:
             character.isspace() for character in url
         ):
             raise ValueError(f"{path.name}: page {index} needs an https:// url.")
+        url = url.split("#", 1)[0]
         if url in seen:
             raise ValueError(f"{path.name}: page {index} repeats {url}.")
         if not isinstance(title, str):
