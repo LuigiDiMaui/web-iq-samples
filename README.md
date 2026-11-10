@@ -7,7 +7,7 @@ Runnable examples for building applications with Microsoft Web IQ.
 This repository includes the runnable code and deployment samples listed below. 
 These are educational samples, not production-ready reference architectures. 
 Review each sample's security, cost, and operational requirements before use 
-or deployment. Nothird-party source code is vendored; the samples install 
+or deployment. No third-party source code is vendored; the samples install 
 their dependencies separately.
 
 ## Samples
