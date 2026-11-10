@@ -104,6 +104,36 @@ def test_rank_sources_prefers_distinctive_words():
     assert [source.page for source in ranked] == [ENCRYPTION]
 
 
+@pytest.mark.parametrize(
+    ("question", "contents"),
+    [
+        (
+            "Is customer information encrypted?",
+            ("Customer information is encrypted.", "All customer records are encrypted."),
+        ),
+        (
+            "Is customer data encrypted at rest?",
+            ("Customer information is encrypted at rest.", "All records are encrypted at rest."),
+        ),
+    ],
+)
+def test_rank_sources_keeps_pages_whose_matching_words_are_on_every_page(question, contents):
+    pages = tuple(
+        Page(f"https://a.example/{i}", "", content, None, None)
+        for i, content in enumerate(contents)
+    )
+    assert [source.page for source in rank_sources(question, pages)] == list(pages)
+
+
+def test_rank_sources_ranks_shared_words_below_distinctive_ones():
+    shared = Page("https://a.example/shared", "", "All records are encrypted.", None, None)
+    distinctive = Page(
+        "https://a.example/keys", "", "Records are encrypted with rotated keys.", None, None
+    )
+    ranked = rank_sources("Are records encrypted with rotated keys?", (shared, distinctive))
+    assert [source.page for source in ranked] == [distinctive]
+
+
 def test_rank_sources_returns_nothing_without_a_match():
     assert rank_sources("Which certifications do you hold?", (RESIDENCY, ENCRYPTION)) == ()
 

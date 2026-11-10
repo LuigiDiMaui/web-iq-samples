@@ -99,7 +99,7 @@ The 200-character limit follows the Use and Display Requirements in the [Web IQ 
 
 ### How sources are picked
 
-The sample ranks pages by how many of the question's distinctive words their passages contain, so it runs without a model. Words that appear on every page, and words common to all questionnaire questions such as "customer" and "data", count less or not at all. A page needs at least two of the question's words (one if the question has only one), and a second source is shown only when it scores close to the first. "Not found on these pages" means no page matched well enough; it isn't a statement about the vendor. Your model, or a person, does the real reading.
+The sample ranks pages by how many of the question's distinctive words their passages contain, so it runs without a model. Words common to all questionnaire questions, such as "customer" and "data", don't count. A page needs at least two of the question's words (one if the question has only one). Words that appear on every page still count toward that, but they score less, so they help less in choosing between pages. A second source is shown only when it scores close to the first. "Not found on these pages" means no page matched well enough; it isn't a statement about the vendor. Your model, or a person, does the real reading.
 
 ## Live crawl
 

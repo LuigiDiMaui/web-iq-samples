@@ -105,7 +105,13 @@ def test_404_with_live_crawl_does_not_suggest_it_again():
 
 
 @pytest.mark.parametrize(
-    "code", ["BrowseApiIsUrlExcluded", "URLFilteredOutEncumbrance", "BrowseApiIsFilteredOut"]
+    "code",
+    [
+        "BrowseApiIsUrlExcluded",
+        "URLFilteredOutEncumbrance",
+        "URLFilteredOutSource403Forbidden",
+        "BrowseApiIsFilteredOut",
+    ],
 )
 def test_blocked_pages_are_page_problems(code):
     browse, calls = browse_client(httpx.Response(403, json={"errorCode": code}))

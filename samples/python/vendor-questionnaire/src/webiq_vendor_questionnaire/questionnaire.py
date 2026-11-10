@@ -121,10 +121,11 @@ def build_results(
 def rank_sources(question: str, pages: tuple[Page, ...]) -> tuple[Source, ...]:
     """Rank pages by the question's distinctive words found in their passages.
 
-    A simple keyword match, so the sample runs without a model. Words found on every
-    page count less. A page needs at least two of the question's words (one if the
-    question has only one), including one that isn't on every page. A second source is
-    kept only when it scores close to the first.
+    A simple keyword match, so the sample runs without a model. A page needs at least
+    two of the question's words (one if the question has only one). Words found on
+    every page still count toward that, but they score less, so they help less in
+    choosing between pages. A second source is kept only when it scores close to the
+    first.
     """
     terms = keywords(question)
     if not terms or not pages:
@@ -136,8 +137,6 @@ def rank_sources(question: str, pages: tuple[Page, ...]) -> tuple[Source, ...]:
     for page, found in zip(pages, page_terms):
         matched = terms & found
         if len(matched) < needed:
-            continue
-        if len(pages) > 1 and all(document_frequency[t] == len(pages) for t in matched):
             continue
         scored.append(Source(page, sum(1 / document_frequency[term] for term in matched)))
     scored.sort(key=lambda source: source.score, reverse=True)

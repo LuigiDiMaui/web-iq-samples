@@ -30,6 +30,7 @@ PAGE_BLOCKED_CODES = {
     "BrowseApiIsUrlExcluded",
     "URLFilteredOutSpamAdult",
     "URLFilteredOutEncumbrance",
+    "URLFilteredOutSource403Forbidden",
 }
 LIVE_CRAWL_LIMIT_CODES = {"TooManyOnDemandCrawls", "BrowseApiTooManyOnDemandCrawls"}
 KNOWN_ERROR_CODES = {
