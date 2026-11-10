@@ -5,7 +5,7 @@
 
 import re
 from collections.abc import Callable
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 
 from .client import BrowseClient, Page, PageProblem
@@ -74,7 +74,9 @@ def collect(
                  f"{len(vendor.pages)} pages)...")
     pool = ThreadPoolExecutor(max_workers=WORKERS)
     try:
-        for future in [pool.submit(run, pair, False) for pair in pairs]:
+        # Check requests as they finish, so a failure that stops the run isn't hidden
+        # behind a slow earlier request.
+        for future in as_completed([pool.submit(run, pair, False) for pair in pairs]):
             future.result()
     except BaseException:
         # A failure that stops the run (or Ctrl+C) cancels the queued requests.

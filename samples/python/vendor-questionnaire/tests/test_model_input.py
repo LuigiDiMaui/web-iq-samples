@@ -6,7 +6,7 @@ from webiq_vendor_questionnaire.model_input import (
     INSTRUCTIONS,
     build_model_input,
     check_model_answer,
-    longest_copied_run,
+    copied_characters,
 )
 
 SOURCE = "Synthetic source sentence number {} for demonstration only. "
@@ -41,6 +41,16 @@ def test_copied_answer_is_flagged():
     assert findings[0].copied_characters >= 250
 
 
-def test_longest_copied_run():
-    assert longest_copied_run("abc hello world xyz", "hello world") == len("hello world")
-    assert longest_copied_run("", "source") == 0
+def test_short_copied_excerpts_are_added_up():
+    # Three excerpts of 100 characters, each under the limit, 300 in total.
+    excerpts = [PAGE.content[i * 300 : i * 300 + 100] for i in range(3)]
+    answer = " In other words, ".join(excerpts)
+    findings = check_model_answer(answer, (PAGE,))
+    assert len(findings) == 1
+    assert findings[0].copied_characters >= 300
+
+
+def test_copied_characters_skips_short_common_phrases():
+    assert copied_characters("abc hello world xyz", "hello world") == 0
+    assert copied_characters("abc hello world xyz", "hello world", min_run=5) == len("hello world")
+    assert copied_characters("", "source") == 0

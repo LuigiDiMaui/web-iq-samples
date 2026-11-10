@@ -140,7 +140,7 @@ No model runs in this sample. To draft answers with your own model, add the call
 
 1. `build_model_input(answer.question, answer.pages)` (in `model_input.py`) builds the prompt: an instruction to answer only from the numbered sources, paraphrase, cite each source by number, and not copy a source's wording, then the question and every page's passages as numbered sources.
 2. Call your model with that prompt.
-3. `check_model_answer(draft, answer.pages)` measures the longest exact copy from each source in the draft and flags any source copied for more than 200 characters. The Terms of Use apply the same limit to verbatim text in model output, and a prompt alone doesn't guarantee it. Rewrite or drop a flagged draft.
+3. `check_model_answer(draft, answer.pages)` adds up the exact wording copied from each source in the draft (excerpts of 20 characters or more) and flags any source copied for more than 200 characters in total. The Terms of Use apply the same limit to verbatim text in model output, and a prompt alone doesn't guarantee it. Rewrite or drop a flagged draft.
 4. Show the draft with its numbered sources and links next to it.
 
 Treat retrieved content as untrusted data, not instructions, and keep a human review step: a questionnaire answer is a statement about a vendor. Because the app's own quote and any copied wording in the model's answer add up for the same source, keep the model to paraphrasing. Model costs, data handling, and retention are your application's responsibility. Don't add storage for passages or drafts.

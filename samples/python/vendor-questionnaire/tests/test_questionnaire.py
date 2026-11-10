@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
+import json
 import time
 
 import httpx
@@ -59,6 +60,29 @@ def test_collect_cancels_queued_requests_after_a_run_stopping_error():
         calls.append(request)
         time.sleep(0.02)
         return httpx.Response(401, json={"errorCode": "AuthInvalidApiKey"})
+
+    http = httpx.Client(transport=httpx.MockTransport(handler))
+    browse = BrowseClient("k", client=http, min_interval=0)
+    vendor = Vendor("A", tuple(VendorPage("", f"https://a.example/{i}") for i in range(10)))
+    questions = tuple(f"Question {i}?" for i in range(10))
+    with pytest.raises(BrowseError):
+        collect(browse, vendor, questions)
+    assert len(calls) < 20
+
+
+def test_collect_stops_on_a_fatal_error_behind_a_slow_request():
+    calls = []
+
+    def handler(request):
+        body = json.loads(request.content)
+        calls.append(body)
+        if body["url"] == "https://a.example/0" and body["query"] == "Question 0?":
+            time.sleep(0.5)
+        elif body["url"] == "https://a.example/1" and body["query"] == "Question 0?":
+            return httpx.Response(401, json={"errorCode": "AuthInvalidApiKey"})
+        else:
+            time.sleep(0.01)
+        return httpx.Response(200, json={"url": body["url"], "title": "", "content": "Synthetic."})
 
     http = httpx.Client(transport=httpx.MockTransport(handler))
     browse = BrowseClient("k", client=http, min_interval=0)
