@@ -22,9 +22,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--mode",
-        choices=("fast", "advanced"),
-        default="fast",
-        help="fast prioritizes speed; advanced prioritizes comprehensiveness (default: fast).",
+        choices=("lite", "advanced"),
+        default="lite",
+        help="lite prioritizes speed; advanced prioritizes comprehensiveness (default: lite).",
     )
     parser.add_argument(
         "--language", default="en", help="Two-letter interface language (default: en)."

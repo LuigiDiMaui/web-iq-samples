@@ -34,7 +34,7 @@ def mock_client(*responses):
 def test_build_request_uses_documented_defaults():
     assert build_request("  The Eiffel Tower is taller than 300 metres. ") == {
         "query": "The Eiffel Tower is taller than 300 metres.",
-        "mode": "fast",
+        "mode": "lite",
         "language": "en",
         "region": "US",
         "maxResponseLength": 30000,

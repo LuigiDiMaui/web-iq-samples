@@ -56,7 +56,7 @@ Use the prompt rather than passing sensitive draft text on the command line, whe
 
 | Command | Use it when |
 | --- | --- |
-| `webiq-claim-check` | You want a fast first look. `fast` prioritizes speed. |
+| `webiq-claim-check` | You want a quick first look. `lite` prioritizes speed. |
 | `webiq-claim-check --mode advanced` | A more comprehensive evidence search matters more than latency. |
 | `webiq-claim-check --language en --region US` | You want to set the interface language and market. These are the defaults. |
 | `webiq-claim-check --help` | You want to see the options without a key or a network call. |
@@ -70,7 +70,7 @@ The sample sends this request to `https://api.microsoft.ai/v3/auto` with the `x-
 ```json
 {
   "query": "<the statement entered for this run>",
-  "mode": "fast",
+  "mode": "lite",
   "language": "en",
   "region": "US",
   "maxResponseLength": 30000,

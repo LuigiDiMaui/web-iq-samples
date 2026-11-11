@@ -40,12 +40,12 @@ class AutoError(RuntimeError):
 
 
 def build_request(
-    query: str, *, mode: str = "fast", language: str = "en", region: str = "US"
+    query: str, *, mode: str = "lite", language: str = "en", region: str = "US"
 ) -> dict[str, object]:
     if not isinstance(query, str) or not 1 <= len(query.strip()) <= 1_000:
         raise ValueError("The claim must contain between 1 and 1,000 characters.")
-    if mode not in {"fast", "advanced"}:
-        raise ValueError("Mode must be fast or advanced.")
+    if mode not in {"lite", "advanced"}:
+        raise ValueError("Mode must be lite or advanced.")
     if not re.fullmatch(r"[a-zA-Z]{2}", language):
         raise ValueError("Language must be a two-letter code, such as en.")
     if not re.fullmatch(r"[a-zA-Z]{2}", region):
@@ -64,7 +64,7 @@ def search_auto(
     api_key: str,
     query: str,
     *,
-    mode: str = "fast",
+    mode: str = "lite",
     language: str = "en",
     region: str = "US",
     client: httpx.Client | None = None,
