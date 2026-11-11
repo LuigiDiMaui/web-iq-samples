@@ -4,9 +4,6 @@ Review current evidence for a statement before you publish an article or product
 
 The sample calls the Auto REST API directly. It doesn't call a model and doesn't produce a true/false verdict. Retrieved content stays in memory for the current run: no files, database, cache, or export.
 
-> [!NOTE]
-> Auto is in beta for Web IQ applications that are enabled for Auto. The API surface might change.
-
 ## What the user does
 
 1. Paste one statement from a draft, up to 1,000 characters.
